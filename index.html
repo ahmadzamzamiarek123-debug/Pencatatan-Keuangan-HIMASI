@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kas HIMA SI</title>
+    <meta name="description" content="Sistem Pencatatan Kas Himpunan Mahasiswa Sistem Informasi" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <!-- PIN Login Gate -->
+    <div id="loginGate" class="login-gate">
+      <div class="login-box">
+        <div class="login-logo">[🔐]</div>
+        <h1 class="login-title">KAS HIMA SI</h1>
+        <p class="login-subtitle">Masukkan PIN Bendahara</p>
+        
+        <form id="loginForm" class="login-form">
+          <div class="form-group">
+            <input 
+              type="password" 
+              id="pinInput" 
+              class="input login-input" 
+              placeholder="••••••" 
+              maxlength="20"
+              autocomplete="off"
+              required
+            />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full">
+            [ MASUK ]
+          </button>
+        </form>
+        
+        <p id="loginError" class="login-error" style="display: none;">
+          PIN salah! Coba lagi.
+        </p>
+        
+        <p class="login-hint">
+          Hubungi Bendahara untuk akses
+        </p>
+      </div>
+    </div>
+
+    <div class="app" id="mainApp" style="display: none;">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <span class="logo">[💰]</span>
+          <div class="header-text">
+            <h1 class="title">KAS HIMA</h1>
+            <p class="subtitle">Sistem Informasi</p>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+            <span class="icon-sun">☀️</span>
+            <span class="icon-moon">🌙</span>
+          </button>
+          <button class="btn btn-sm btn-outline" id="logoutBtn" title="Logout">
+            🚪
+          </button>
+        </div>
+      </header>
+
+      <!-- Tab Navigation -->
+      <nav class="tabs">
+        <button class="tab active" data-tab="masuk" id="tabMasuk">
+          [ MASUK ]
+        </button>
+        <button class="tab" data-tab="keluar" id="tabKeluar">
+          [ KELUAR ]
+        </button>
+        <button class="tab" data-tab="riwayat" id="tabRiwayat">
+          [ RIWAYAT ]
+        </button>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="main">
+        
+        <!-- TAB: MASUK (Income) -->
+        <section class="tab-panel active" id="panelMasuk">
+          <div class="card">
+            <h2 class="card-title">// INPUT PEMASUKAN</h2>
+            
+            <!-- Dual Mode Toggle -->
+            <div class="mode-toggle">
+              <button class="mode-btn active" id="modeIuran" data-mode="iuran">
+                💰 Iuran Anggota
+              </button>
+              <button class="mode-btn" id="modeLain" data-mode="lain">
+                🏛️ Pemasukan Lain
+              </button>
+            </div>
+
+            <!-- Container: Iuran Anggota (Default) -->
+            <div id="container-iuran">
+              <!-- Filters -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="filterKelas">&gt; Kelas</label>
+                  <select id="filterKelas" class="input">
+                    <option value="">Semua</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="minggu">&gt; Minggu</label>
+                  <select id="minggu" class="input">
+                    <option value="">Pilih</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="tanggal">&gt; Tanggal</label>
+                  <input type="date" id="tanggal" class="input" />
+                </div>
+              </div>
+
+              <!-- Set Default -->
+              <div class="default-section">
+                <label>&gt; Set Default Nominal:</label>
+                <div class="default-row">
+                  <span class="prefix">Rp</span>
+                  <input type="text" id="defaultAmount" class="input" placeholder="0" inputmode="numeric" />
+                  <button id="applyDefaultBtn" class="btn btn-outline">APPLY ALL</button>
+                </div>
+              </div>
+
+              <hr class="divider" />
+
+              <!-- Member List -->
+              <div class="section-header">
+                <h3>&gt; Daftar Anggota</h3>
+                <input type="text" id="searchInput" class="input search" placeholder="Cari..." />
+              </div>
+
+              <div id="loadingList" class="loading">
+                <span class="spinner"></span>
+                <p>Loading...</p>
+              </div>
+
+              <div id="memberList" class="member-list" style="display: none;">
+                <!-- Members loaded dynamically -->
+              </div>
+
+              <div id="emptyState" class="empty" style="display: none;">
+                <p>[ TIDAK ADA DATA ]</p>
+              </div>
+            </div>
+
+            <!-- Container: Pemasukan Lain (Hidden by default) -->
+            <div id="container-lain" class="hidden">
+              <div class="form-stack">
+                <div class="form-group">
+                  <label for="otherTanggal">&gt; Tanggal</label>
+                  <input type="date" id="otherTanggal" class="input" />
+                </div>
+                
+                <div class="form-group">
+                  <label for="otherSumber">&gt; Sumber</label>
+                  <select id="otherSumber" class="input">
+                    <option value="">-- Pilih Sumber --</option>
+                    <option value="Dana Kampus">Dana Kampus</option>
+                    <option value="Danus/Jualan">Danus/Jualan</option>
+                    <option value="Sponsorship">Sponsorship</option>
+                    <option value="Lainnya">Lainnya</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="otherKeterangan">&gt; Keterangan</label>
+                  <textarea id="otherKeterangan" class="input textarea" rows="3" placeholder="Deskripsi pemasukan..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                  <label for="otherNominal">&gt; Nominal</label>
+                  <div class="input-with-prefix">
+                    <span class="prefix">Rp</span>
+                    <input type="text" id="otherNominal" class="input" placeholder="0" inputmode="numeric" />
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="otherPJ">&gt; Penanggung Jawab</label>
+                  <input type="text" id="otherPJ" class="input" placeholder="Nama PJ" />
+                </div>
+              </div>
+
+              <button id="submitOtherIncomeBtn" class="btn btn-primary btn-full">
+                [ SUBMIT PEMASUKAN LAIN ]
+              </button>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB: KELUAR (Expenses) -->
+        <section class="tab-panel" id="panelKeluar">
+          <div class="card">
+            <h2 class="card-title">// INPUT PENGELUARAN</h2>
+            
+            <div class="form-stack">
+              <div class="form-group">
+                <label for="expTanggal">&gt; Tanggal</label>
+                <input type="date" id="expTanggal" class="input" />
+              </div>
+              
+              <div class="form-group">
+                <label for="expKategori">&gt; Kategori</label>
+                <select id="expKategori" class="input">
+                  <option value="">-- Pilih Kategori --</option>
+                  <option value="Konsumsi">Konsumsi</option>
+                  <option value="ATK">ATK</option>
+                  <option value="Transport">Transport</option>
+                  <option value="Print/Fotokopi">Print/Fotokopi</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="expKeterangan">&gt; Keterangan</label>
+                <textarea id="expKeterangan" class="input textarea" rows="3" placeholder="Deskripsi pengeluaran..."></textarea>
+              </div>
+              
+              <div class="form-group">
+                <label for="expNominal">&gt; Nominal</label>
+                <div class="input-with-prefix">
+                  <span class="prefix">Rp</span>
+                  <input type="text" id="expNominal" class="input" placeholder="0" inputmode="numeric" />
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="expPJ">&gt; Penanggung Jawab</label>
+                <input type="text" id="expPJ" class="input" placeholder="Nama PJ" />
+              </div>
+            </div>
+
+            <button id="submitExpenseBtn" class="btn btn-primary btn-full">
+              [ SUBMIT PENGELUARAN ]
+            </button>
+          </div>
+        </section>
+
+        <!-- TAB: RIWAYAT (History) -->
+        <section class="tab-panel" id="panelRiwayat">
+          <div class="card">
+            <h2 class="card-title">// RIWAYAT TRANSAKSI</h2>
+            
+            <!-- Summary -->
+            <div class="summary-box" id="summaryBox">
+              <div class="summary-row">
+                <span>Total Masuk:</span>
+                <span class="text-success" id="summaryMasuk">Rp 0</span>
+              </div>
+              <div class="summary-row">
+                <span>Total Keluar:</span>
+                <span class="text-danger" id="summaryKeluar">Rp 0</span>
+              </div>
+              <hr class="divider-thin" />
+              <div class="summary-row summary-total">
+                <span>Saldo:</span>
+                <span id="summarySaldo">Rp 0</span>
+              </div>
+            </div>
+
+            <!-- Control Bar -->
+            <div class="control-bar">
+              <div class="form-group">
+                <label for="historyFilter">&gt; Filter</label>
+                <select id="historyFilter" class="input">
+                  <option value="all">Semua Transaksi</option>
+                  <option value="in_member">🟢 Iuran Anggota</option>
+                  <option value="in_other">🔵 Pemasukan Lain</option>
+                  <option value="out">🔴 Pengeluaran</option>
+                </select>
+              </div>
+              <div class="form-group flex-grow">
+                <label for="historySearch">&gt; Cari</label>
+                <input type="text" id="historySearch" class="input" placeholder="Nama, ket, tanggal..." />
+              </div>
+              <button id="refreshHistoryBtn" class="btn btn-outline">🔄</button>
+            </div>
+
+            <hr class="divider" />
+
+            <div id="loadingHistory" class="loading">
+              <span class="spinner"></span>
+              <p>Loading...</p>
+            </div>
+
+            <div id="historyList" class="history-list" style="display: none;">
+              <!-- History loaded dynamically -->
+            </div>
+
+            <div id="emptyHistory" class="empty" style="display: none;">
+              <p>[ BELUM ADA RIWAYAT ]</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- Sticky Footer (for Masuk tab) -->
+      <footer class="footer" id="stickyFooter">
+        <div class="footer-stats">
+          <div class="stat">
+            <span class="stat-label">Anggota:</span>
+            <span class="stat-value" id="totalCount">0</span>
+          </div>
+          <div class="stat stat-highlight">
+            <span class="stat-label">Total:</span>
+            <span class="stat-value" id="totalAmount">Rp 0</span>
+          </div>
+        </div>
+        <button id="submitBtn" class="btn btn-primary" disabled>
+          [ SUBMIT ]
+        </button>
+      </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="overlay">
+      <div class="overlay-content">
+        <span class="spinner large"></span>
+        <p id="loadingText">Processing...</p>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal">
+      <div class="modal-box">
+        <div class="modal-icon">[✓]</div>
+        <h2>BERHASIL</h2>
+        <p id="successMessage">Data tersimpan.</p>
+        <button class="btn btn-primary" onclick="closeSuccessModal()">OK</button>
+      </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div id="errorModal" class="modal">
+      <div class="modal-box modal-error">
+        <div class="modal-icon">[✗]</div>
+        <h2>ERROR</h2>
+        <p id="errorMessage">Terjadi kesalahan.</p>
+        <button class="btn btn-primary" onclick="closeErrorModal()">TUTUP</button>
+      </div>
+    </div>
+
+    <!-- Edit Income Modal -->
+    <div id="editModal" class="modal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h2>// EDIT TRANSAKSI</h2>
+          <button class="modal-close" onclick="closeEditModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nama:</strong> <span id="editNama"></span></p>
+          <p><strong>NIM:</strong> <span id="editNim"></span></p>
+          <p><strong>Minggu:</strong> <span id="editMinggu"></span></p>
+          <div class="form-group">
+            <label>&gt; Nominal Baru:</label>
+            <div class="input-with-prefix">
+              <span class="prefix">Rp</span>
+              <input type="text" id="editNominal" class="input" inputmode="numeric" />
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeEditModal()">BATAL</button>
+          <button class="btn btn-primary" id="saveEditBtn">SIMPAN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+      <div class="modal-box modal-error">
+        <div class="modal-icon">[!]</div>
+        <h2>HAPUS?</h2>
+        <p id="deleteMessage">Yakin ingin menghapus?</p>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="closeDeleteModal()">BATAL</button>
+          <button class="btn btn-danger" id="confirmDeleteBtn">HAPUS</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
